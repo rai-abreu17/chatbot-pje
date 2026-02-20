@@ -52,6 +52,9 @@ SINONIMOS = {
     "esqueci": ["esquecida", "perdi", "não lembro", "esqueceu", "senha"],
     "bloqueada": ["bloqueou", "bloqueado", "travada", "travou"],
     "acesso": ["login", "entrar", "acessar", "logar", "autenticar"],
+    "usuário": ["user", "usuario", "conta", "cadastro"],
+    "encontrado": ["encontrar", "reconhecido", "localizado", "achado"],
+    "não encontrado": ["usuário não encontrado", "erro usuário", "conta não existe"],
     
     # Certificado digital
     "certificado": ["token", "smart card", "assinatura digital", "e-cpf", "e-cnpj"],
@@ -255,7 +258,8 @@ class RAGEngine:
         termos_importantes = {"cache", "senha", "certificado", "login", "erro", "lento", "lentidão", 
                               "navegador", "firefox", "chrome", "primeiro", "acesso", "token", "pje",
                               "problema", "solução", "limpar", "travando", "devagar", "esqueci",
-                              "esquecida", "bloqueada", "recuperar", "solicitar", "nova"}
+                              "esquecida", "bloqueada", "recuperar", "solicitar", "nova", "usuário",
+                              "encontrado", "link", "expirado", "validade"}
         bonus = sum(0.15 for t in termos_importantes if t in intersecao)
         
         return min(jaccard + bonus, 1.0)
@@ -346,7 +350,8 @@ class RAGEngine:
             termos_relevantes = {"cache", "limpar", "chrome", "firefox", "edge", "navegador", "senha", 
                                  "certificado", "login", "acesso", "lentidão", "lento", "erro",
                                  "token", "pje", "primeiro", "acesso", "esqueci", "esquecida",
-                                 "bloqueada", "recuperar", "solicitar", "nova", "google"}
+                                 "bloqueada", "recuperar", "solicitar", "nova", "google", "usuário",
+                                 "encontrado", "link", "expirado"}
             palavras_contexto = [p for p in palavras_historico if p in termos_relevantes]
             if palavras_contexto:
                 consulta_para_busca = f"{pergunta} {' '.join(set(palavras_contexto))}"
