@@ -1,0 +1,228 @@
+===================================================================
+BASE DE CONHECIMENTO - ASSISTENTE VIRTUAL PJe
+Processo Judicial Eletrônico - Justiça Eleitoral
+Fonte: https://pjeje.github.io/dicas/
+===================================================================
+
+SEÇÃO 1: O QUE É O PJe
+
+O PJe (Processo Judicial Eletrônico) é a plataforma digital unificada utilizada pela Justiça Eleitoral para gestão de processos judiciais, consulta de informações processuais, peticionamento eletrônico e automação de tarefas administrativas. O sistema permite que advogados, servidores e partes interessadas realizem diversas operações de forma online.
+
+O PJe funciona inteiramente via navegador web (preferencialmente Mozilla Firefox ou Google Chrome) e requer autenticação com certificado digital ou login e senha cadastrados.
+
+---
+
+SEÇÃO 2: CONFIGURAÇÃO DO COMPUTADOR E PRÉ-REQUISITOS
+
+Para utilizar o PJe adequadamente, seu computador deve atender aos seguintes requisitos:
+
+• Navegador: Preferencialmente Mozilla Firefox. O Google Chrome também é compatível e pode ser usado como alternativa.
+• Certificado Digital: Usuários externos precisam de um certificado digital válido para juntar documentos. Tipos aceitos: A1 (arquivo) ou A3 (token/smart card).
+• PJe Office: Para utilização do certificado digital é preciso ter o PJe Office instalado na máquina. Usuários externos devem sempre usar a versão mais atualizada.
+• Driver do certificado: Para uso de certificado digital físico, é preciso ter o driver instalado no computador.
+• Conexão: Acesso à internet.
+• Token PJe ou Certificado P12: Opções específicas para usuários internos da Justiça Eleitoral.
+
+Na página inicial do PJe, ao clicar em "Pré-Requisitos", é possível verificar se está tudo em ordem para o acesso ao sistema.
+
+---
+
+SEÇÃO 3: PROBLEMAS COMUNS E SOLUÇÕES RÁPIDAS
+
+3.1 - SISTEMA LENTO OU ERROS DE EXIBIÇÃO DAS TAREFAS
+
+Na grande maioria dos casos, a lentidão ou erros genéricos no PJe são causados por dados antigos armazenados no cache do navegador. A limpeza de cache resolve a maioria dos problemas.
+
+Cache do browser é a memória local do computador. São informações como imagens, scripts e outras partes de sites visitados, salvas temporariamente no navegador. Muitas funcionalidades do PJe guardam registros na memória da estação, por isso pode ser necessário limpar o cache.
+
+Sempre que há muita lentidão ou quando ocorrem erros de exibição das tarefas, o recomendado é a execução do procedimento de limpeza de cache.
+
+Como limpar o cache no Google Chrome:
+1. Acesse o menu do canto superior direito (três bolinhas).
+2. Vá em Configurações.
+3. Escolha Privacidade e segurança.
+4. Clique na opção "Remover dados de navegação".
+5. Garanta que as opções "Cookies" e "Cache" estejam selecionadas.
+6. Remova os dados.
+7. Atualize a página e faça novo login.
+
+Como limpar o cache no Mozilla Firefox:
+1. Acesse o menu do canto superior direito (três risquinhos).
+2. Vá em Configurações.
+3. Escolha Privacidade e segurança.
+4. Em "Cookies e dados de sites", clique na opção "Limpar dados".
+5. As duas opções (Cookies e Cache) precisam estar marcadas.
+6. Limpe os dados.
+7. Atualize a página e faça novo login.
+
+3.2 - PRIMEIRO ACESSO AO SISTEMA
+
+Ao acessar o sistema pela primeira vez, é necessário desbloquear as janelas popup do navegador.
+
+Usuários internos (servidores e magistrados) precisam ser previamente cadastrados antes de efetuar o primeiro acesso, caso contrário o sistema reconhecerá o certificado digital e criará um cadastro de Jus Postulandi.
+
+Usuários externos de procuradorias (Procuradores gestores, procuradores distribuidores e representantes processuais) também precisam de pré-cadastro.
+
+Advogados são automaticamente reconhecidos pelo sistema, em decorrência da integração entre as bases de dados do PJe, Receita Federal e Ordem dos Advogados do Brasil. Na tela inicial do PJe, clique no botão "Acessar com certificado digital" e siga as instruções da tela para efetuar o cadastro.
+
+3.3 - SENHA ESQUECIDA OU BLOQUEADA
+
+A geração de senha para o uso do PJe pode ser feita no cadastramento do usuário ou, a qualquer tempo, pelo próprio usuário.
+
+Como solicitar nova senha:
+1. Na página inicial do PJe, utilize a opção "Solicitar nova senha".
+2. Preencha com seus dados.
+3. Um e-mail será enviado com um link para criação de senha.
+4. Utilize o link antes do prazo de expiração.
+
+IMPORTANTE: Os links enviados por e-mail têm um prazo de validade. Sempre que um novo link é gerado (seja por solicitação do usuário ou por um administrador), o antigo perde a validade. Se houver dificuldades, todos os e-mails com links antigos devem ser apagados antes de fazer nova tentativa.
+
+3.4 - ERRO AO LOGAR COM CERTIFICADO DIGITAL (TELA "PISCA" E VOLTA)
+
+Ao tentar logar com token físico (certificado digital), se a tela apenas atualiza e não acontece nada:
+
+1. Verifique no PJe Office se o endereço do PJe que você está tentando acessar está autorizado (clique com o botão direito do mouse sobre o ícone do PJe Office e vá em Segurança/Sites Autorizados).
+
+2. Caso não seja problema de permissão, a solução é solicitar uma senha na tela inicial do PJe, aguardar a chegada do e-mail contendo o link para definição desta. Uma vez gerada a senha e feito o login com ela, basta acessar novamente com certificado digital e o problema estará resolvido.
+
+Sugestão: A senha cadastrada deve ser a mesma eventualmente utilizada em outros sistemas do CNJ vinculados à PDPJ, para evitar conflitos, pois o login é único para todos os sistemas vinculados à Plataforma.
+
+3.5 - ERRO DE USUÁRIO NÃO ENCONTRADO AO GERAR SENHA
+
+Quando o usuário solicita a nova senha mais de uma vez, ou se ultrapassa o limite de validade do link, pode aparecer erro de usuário não encontrado.
+
+Isso acontece porque os links enviados por e-mail têm um prazo de validade. Caso o usuário já tenha feito uma nova solicitação de recuperação de senha e utilize um link enviado anteriormente, haverá erro.
+
+Solução: Todos os e-mails com links para geração de senha devem ser apagados antes de fazer nova tentativa.
+
+---
+
+SEÇÃO 4: FUNCIONALIDADES PRINCIPAIS
+
+4.1 - CONSULTA PROCESSUAL
+
+O PJe oferece dois tipos de consulta:
+• Consulta interna: Para usuários logados no sistema.
+• Consulta pública: Para consultas sem necessidade de login.
+
+4.2 - AUTOS DIGITAIS
+
+Os autos digitais contêm todos os documentos vinculados ao processo. A aba "Documentos" exibe uma lista paginada com todos os documentos, incluindo:
+
+• Id - Identificador do documento
+• Id na origem - Identificador do documento na origem (se foi remetido)
+• Número - Número do documento (identificador negocial)
+• Origem - Grau de jurisdição onde foi criado o documento
+• Juntado em - Data de juntada do documento
+• Juntado por - Usuário responsável pela juntada
+• Documento - Descrição atribuída ao documento
+• Tipo - Tipo de documento vinculado
+
+Ícones importantes:
+• Folha - Visualizar conteúdo do documento
+• Edição - Editar o documento
+• Cadeado fechado - Documento assinado (clique para ver dados da assinatura)
+• Cadeado aberto - Documento não assinado (clique para assinar)
+• Exclusão/Inativação - Excluir (não juntado) ou inativar (juntado)
+
+4.3 - DOCUMENTOS PROCESSUAIS
+
+Informações sobre documentos do processo:
+• Chave de acesso - Para acesso externo a documentos específicos
+• Petição avulsa - Fluxo para petições fora do processo
+• Anexos - Documentos anexados
+• Documentos não lidos - Controle de leitura
+
+4.4 - ATOS PROCESSUAIS
+
+Funcionalidades disponíveis:
+• Audiências
+• Minutar ato avulso
+• Registrar trânsito
+• Minutar em lote
+• Lançar movimentação em lote
+• Movimentações processuais
+
+4.5 - PRAZOS PROCESSUAIS
+
+O sistema oferece:
+• Controle de prazos
+• Contagem em horas
+• Configuração do calendário
+
+---
+
+SEÇÃO 5: ADVOGADOS
+
+Situações comuns relacionadas a advogados:
+
+• Indisponibilidade na OAB - Quando o sistema da OAB está fora do ar
+• Situação da Inscrição na OAB - Verificação da situação cadastral
+• Advogado não validado - Quando o cadastro não foi validado pelo sistema
+
+---
+
+SEÇÃO 6: AUTUAÇÃO
+
+Processo de autuação de novos processos no sistema.
+
+---
+
+SEÇÃO 7: COMUNICAÇÃO DE ATOS PROCESSUAIS
+
+Funcionalidades relacionadas à comunicação de atos no sistema.
+
+---
+
+SEÇÃO 8: DISTRIBUIÇÃO
+
+Regras e procedimentos para distribuição de processos.
+
+---
+
+SEÇÃO 9: ETIQUETAS
+
+Sistema de etiquetas para organização e classificação de processos.
+
+---
+
+SEÇÃO 10: PAPÉIS E RECURSOS
+
+Gerenciamento de papéis de usuários e recursos do sistema.
+
+---
+
+SEÇÃO 11: REMESSA
+
+Procedimentos para remessa de processos entre instâncias.
+
+---
+
+SEÇÃO 12: SESSÃO DE JULGAMENTO
+
+Funcionalidades relacionadas às sessões de julgamento.
+
+---
+
+SEÇÃO 13: SIGILO
+
+Gerenciamento de processos e documentos sigilosos.
+
+---
+
+SEÇÃO 14: CONTATO COM O SUPORTE TÉCNICO
+
+Se o seu problema não foi resolvido com as instruções acima, entre em contato com a equipe de suporte técnico do seu tribunal.
+
+Você também pode colaborar com o conteúdo do Dicas PJe através do formulário disponível em: https://pjeje.github.io/dicas/
+
+---
+
+DICAS DE PRODUTIVIDADE
+
+• Use preferencialmente o navegador Mozilla Firefox.
+• Mantenha o PJe Office sempre atualizado.
+• Limpe o cache do navegador regularmente para evitar problemas.
+• Mantenha seu certificado digital válido e o driver atualizado.
+• Desbloqueie popups do navegador para o endereço do PJe.
+• Em caso de instabilidade, tente acessar em horários de menor movimento.

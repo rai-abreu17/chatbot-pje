@@ -1,0 +1,26 @@
+# ============================================================
+# Dependências do Chatbot Assistente SeSJU
+# ============================================================
+# Instale com: pip install -r requirements.txt
+# ============================================================
+
+# --- Framework Web ---
+flask>=3.0.0
+
+# --- IA e LLM (Google Gemini) ---
+google-genai>=1.0.0
+
+# --- RAG (Retrieval-Augmented Generation) ---
+chromadb>=0.5.0
+langchain-text-splitters>=0.2.0
+
+# --- Integração WhatsApp ---
+twilio>=9.0.0
+
+# --- Transcrição de Áudio ---
+SpeechRecognition>=3.10.0
+pydub>=0.25.1
+requests>=2.31.0
+
+# --- Utilitários ---
+python-dotenv>=1.0.0
