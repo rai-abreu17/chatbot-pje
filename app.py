@@ -35,8 +35,112 @@ from rag_engine import RAGEngine
 # Armazena a última resposta completa e partes restantes por usuário
 respostas_pendentes = defaultdict(dict)
 
+# ============================================================
+# HISTÓRICO DE CONVERSA (para manter contexto)
+# ============================================================
+# Armazena as últimas mensagens de cada usuário para contexto
+historico_conversa = defaultdict(list)
+MAX_HISTORICO = 4  # Máximo de mensagens no histórico por usuário
+
+# Respostas curtas que indicam continuação de conversa
+RESPOSTAS_CONTINUACAO = {
+    # Confirmações
+    "sim", "não", "nao", "ok", "certo", "beleza", "blz", "vlw", "valeu", 
+    "obrigado", "obrigada", "ta", "tá", "isso", "entendi", "entendo",
+    # Navegadores (para triagem de cache)
+    "chrome", "firefox", "mozilla", "google", "google chrome", "edge",
+    # Solicitações
+    "quero", "pode", "por favor", "pfv", "pf", "mostra", "mostre", 
+    "explica", "explique", "como", "qual", "manda", "envia",
+    # Pronomes de referência
+    "esse", "essa", "aquele", "aquela", "este", "esta", "primeiro", "segundo"
+}
+
 # Limite de caracteres por mensagem WhatsApp (seguro)
 LIMITE_CARACTERES = 1500
+
+# Dados que podem ser extraídos da mensagem para contexto
+PADROES_CONTEXTO = {
+    "navegador": {
+        "chrome": ["chrome", "google chrome", "navegador do google"],
+        "firefox": ["firefox", "mozilla", "mozilla firefox"],
+        "edge": ["edge", "microsoft edge"],
+    }
+}
+
+
+def extrair_dados_mensagem(mensagem: str) -> dict:
+    """
+    Extrai dados relevantes da mensagem atual (ex: navegador mencionado).
+    Isso permite que o bot identifique informações implícitas.
+    """
+    msg_lower = mensagem.lower()
+    dados = {}
+    
+    # Detecta navegador mencionado
+    for navegador, termos in PADROES_CONTEXTO["navegador"].items():
+        for termo in termos:
+            if termo in msg_lower:
+                dados["navegador"] = navegador
+                break
+        if "navegador" in dados:
+            break
+    
+    return dados
+
+
+def detectar_continuacao(mensagem: str) -> bool:
+    """
+    Detecta se a mensagem é uma resposta curta que indica continuação
+    de uma conversa anterior (ex: 'sim', 'chrome', 'firefox').
+    """
+    msg_lower = mensagem.lower().strip()
+    
+    # Mensagem muito curta (menos de 30 chars) geralmente é continuação
+    if len(msg_lower) < 30:
+        # Verifica se contém palavras de continuação
+        palavras = set(msg_lower.split())
+        if palavras & RESPOSTAS_CONTINUACAO:
+            return True
+        # Mensagem com menos de 15 chars provavelmente é continuação
+        if len(msg_lower) < 15:
+            return True
+    
+    return False
+
+
+def obter_contexto_historico(remetente: str) -> str:
+    """
+    Retorna o contexto do histórico de conversa para um usuário.
+    """
+    if remetente not in historico_conversa or not historico_conversa[remetente]:
+        return ""
+    
+    contexto = []
+    for item in historico_conversa[remetente]:
+        contexto.append(f"Usuário: {item['pergunta']}")
+        # Resumir a resposta se for muito longa
+        resposta = item['resposta']
+        if len(resposta) > 300:
+            resposta = resposta[:300] + "..."
+        contexto.append(f"Assistente: {resposta}")
+    
+    return "\n".join(contexto)
+
+
+def adicionar_ao_historico(remetente: str, pergunta: str, resposta: str):
+    """
+    Adiciona uma interação ao histórico de conversa.
+    Mantém apenas as últimas MAX_HISTORICO mensagens.
+    """
+    historico_conversa[remetente].append({
+        "pergunta": pergunta,
+        "resposta": resposta
+    })
+    
+    # Limita o tamanho do histórico
+    if len(historico_conversa[remetente]) > MAX_HISTORICO:
+        historico_conversa[remetente] = historico_conversa[remetente][-MAX_HISTORICO:]
 
 
 def dividir_resposta(texto: str, limite: int = LIMITE_CARACTERES) -> list:
@@ -174,7 +278,18 @@ def chat():
     pergunta = dados["mensagem"]
     print(f"\n[CHAT] Pergunta recebida: {pergunta}")
 
-    resposta = engine.responder(pergunta)
+    # Extrai dados da mensagem (ex: navegador mencionado)
+    dados_extraidos = extrair_dados_mensagem(pergunta)
+    contexto = ""
+    if dados_extraidos:
+        info_extra = []
+        if "navegador" in dados_extraidos:
+            info_extra.append(f"[DADO IDENTIFICADO: Navegador = {dados_extraidos['navegador'].upper()}]")
+        if info_extra:
+            contexto = "\n".join(info_extra)
+            print(f"[CHAT] Dados extraídos: {dados_extraidos}")
+
+    resposta = engine.responder(pergunta, contexto)
     print(f"[CHAT] Resposta gerada: {resposta[:100]}...")
 
     return jsonify({"resposta": resposta})
@@ -270,8 +385,30 @@ def whatsapp():
         print(f"[WHATSAPP] Enviando continuação ({len(partes)} partes restantes)")
         return str(resp), 200, {"Content-Type": "application/xml"}
     
-    # Gera a resposta usando o motor RAG
-    resposta_texto = engine.responder(mensagem_recebida)
+    # Verifica se é uma continuação de conversa
+    contexto_historico = ""
+    dados_extraidos = extrair_dados_mensagem(mensagem_recebida)
+    
+    # Sempre busca histórico para contexto (motor de decisão dinâmico)
+    contexto_historico = obter_contexto_historico(remetente)
+    
+    # Adiciona dados extraídos da mensagem atual ao contexto
+    if dados_extraidos:
+        info_extra = []
+        if "navegador" in dados_extraidos:
+            info_extra.append(f"[DADO IDENTIFICADO: Navegador = {dados_extraidos['navegador'].upper()}]")
+        if info_extra:
+            contexto_historico = "\n".join(info_extra) + "\n" + contexto_historico
+            print(f"[WHATSAPP] Dados extraídos da mensagem: {dados_extraidos}")
+    
+    if contexto_historico:
+        print(f"[WHATSAPP] Usando contexto de conversa")
+    
+    # Gera a resposta usando o motor RAG (com histórico e dados extraídos)
+    resposta_texto = engine.responder(mensagem_recebida, contexto_historico)
+    
+    # Adiciona ao histórico de conversa
+    adicionar_ao_historico(remetente, mensagem_recebida, resposta_texto)
     
     # Remove caracteres que podem quebrar o TwiML/XML
     resposta_texto = resposta_texto.replace('&', 'e').replace('<', '').replace('>', '')

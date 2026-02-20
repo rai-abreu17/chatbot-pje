@@ -48,7 +48,9 @@ SINONIMOS = {
     "login": ["entrar", "acessar", "logar", "autenticar", "acesso"],
     "entrar": ["login", "acessar", "logar", "autenticar"],
     "não entra": ["não consigo entrar", "não loga", "não acessa", "erro login"],
-    "senha": ["password", "credencial", "chave", "código"],
+    "senha": ["password", "credencial", "chave", "código", "esqueci", "bloqueada", "recuperar"],
+    "esqueci": ["esquecida", "perdi", "não lembro", "esqueceu", "senha"],
+    "bloqueada": ["bloqueou", "bloqueado", "travada", "travou"],
     "acesso": ["login", "entrar", "acessar", "logar", "autenticar"],
     
     # Certificado digital
@@ -252,7 +254,8 @@ class RAGEngine:
         # Bonus para termos-chave encontrados no documento
         termos_importantes = {"cache", "senha", "certificado", "login", "erro", "lento", "lentidão", 
                               "navegador", "firefox", "chrome", "primeiro", "acesso", "token", "pje",
-                              "problema", "solução", "limpar", "travando", "devagar"}
+                              "problema", "solução", "limpar", "travando", "devagar", "esqueci",
+                              "esquecida", "bloqueada", "recuperar", "solicitar", "nova"}
         bonus = sum(0.15 for t in termos_importantes if t in intersecao)
         
         return min(jaccard + bonus, 1.0)
@@ -317,12 +320,12 @@ class RAGEngine:
         contexto = "\n\n---\n\n".join(docs_relevantes)
         return contexto
 
-    def responder(self, pergunta: str) -> str:
+    def responder(self, pergunta: str, historico_conversa: str = "") -> str:
         """
         Gera uma resposta para a pergunta do usuário usando RAG aprimorado.
         
         Fluxo:
-        1. Expande a consulta com sinônimos
+        1. Expande a consulta com sinônimos (e histórico se houver)
         2. Busca trechos relevantes (híbrido: semântico + keywords)
         3. Monta o prompt com o contexto
         4. Envia para o Google Gemini
@@ -330,12 +333,27 @@ class RAGEngine:
         
         Args:
             pergunta: A pergunta do usuário.
+            historico_conversa: Histórico da conversa para contexto (opcional).
             
         Returns:
             String com a resposta gerada pela IA.
         """
+        # Se houver histórico, enriquece a busca com o contexto anterior
+        consulta_para_busca = pergunta
+        if historico_conversa:
+            # Extrai palavras-chave do histórico para melhorar a busca
+            palavras_historico = re.findall(r'\b[a-záéíóúâêîôûãõç]{4,}\b', historico_conversa.lower())
+            termos_relevantes = {"cache", "limpar", "chrome", "firefox", "edge", "navegador", "senha", 
+                                 "certificado", "login", "acesso", "lentidão", "lento", "erro",
+                                 "token", "pje", "primeiro", "acesso", "esqueci", "esquecida",
+                                 "bloqueada", "recuperar", "solicitar", "nova", "google"}
+            palavras_contexto = [p for p in palavras_historico if p in termos_relevantes]
+            if palavras_contexto:
+                consulta_para_busca = f"{pergunta} {' '.join(set(palavras_contexto))}"
+                print(f"[RAG] Consulta enriquecida com contexto: {consulta_para_busca}")
+        
         # Passo 1-2: Buscar contexto relevante (já inclui expansão)
-        contexto = self.buscar_contexto(pergunta)
+        contexto = self.buscar_contexto(consulta_para_busca)
 
         if not contexto:
             return (
@@ -353,7 +371,12 @@ class RAGEngine:
         
         for tentativa in range(max_tentativas):
             try:
-                prompt_completo = f"{prompt_sistema}\n\nPergunta do usuário: {pergunta}"
+                # Inclui histórico da conversa se houver
+                if historico_conversa:
+                    prompt_completo = f"{prompt_sistema}\n\nCONTEXTO DA CONVERSA (use estas informações para decidir se precisa perguntar algo):\n{historico_conversa}\n\nMensagem atual do usuário: {pergunta}"
+                else:
+                    prompt_completo = f"{prompt_sistema}\n\nMensagem do usuário: {pergunta}"
+                
                 resposta = self.client.models.generate_content(
                     model=self.modelo_nome,
                     contents=prompt_completo,
