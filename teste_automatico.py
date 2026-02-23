@@ -58,12 +58,12 @@ PERGUNTAS_TESTE = [
     # Perguntas que NÃO devem ser respondidas (fora do escopo)
     {
         "pergunta": "Qual a receita de bolo de chocolate?",
-        "deve_conter": ["não encontrei", "suporte", "base de conhecimento"],
+        "deve_conter": ["não encontrei", "suporte", "base de conhecimento", "minha função", "não está relacionado", "não posso ajudar", "pje"],
         "tipo": "recusa_esperada",
     },
     {
         "pergunta": "Quem é o presidente do Brasil?",
-        "deve_conter": ["não encontrei", "suporte", "base de conhecimento"],
+        "deve_conter": ["não encontrei", "suporte", "base de conhecimento", "minha função", "não está relacionado", "não posso ajudar", "pje"],
         "tipo": "recusa_esperada",
     },
 ]

@@ -277,7 +277,6 @@ def chat():
 
     pergunta = dados["mensagem"]
     print(f"\n[CHAT] Pergunta recebida: {pergunta}")
-
     # Extrai dados da mensagem (ex: navegador mencionado)
     dados_extraidos = extrair_dados_mensagem(pergunta)
     contexto = ""
