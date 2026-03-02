@@ -1,11 +1,14 @@
 """
-sincronizador.py - Arquitetura Definitiva com PostgreSQL + pgvector
-===================================================================
+sincronizador.py - Arquitetura Híbrida: Oracle (controle) + ChromaDB (vetores)
+===============================================================================
+Oracle: armazena controle de URLs e hashes (dados estruturados)
+ChromaDB: armazena embeddings e faz busca vetorial (similaridade semântica)
 """
 
-import psycopg2
+import os
+import oracledb
 import hashlib
-from pgvector.psycopg2 import register_vector
+import chromadb
 from sentence_transformers import SentenceTransformer
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
@@ -13,46 +16,52 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 CHUNK_SIZE = 1000
 CHUNK_OVERLAP = 250
 
+# Oracle - controle de documentos (hashes, URLs)
 DB_CONFIG = {
-    "dbname": "base_conhecimento_pje",
-    "user": "postgres",                
-    "password": "minhasenha123",       # A senha que colocamos no Docker
-    "host": "localhost",               
-    "port": "5433"                     # A porta nova que definimos no Docker!
+    "user": "CHATBOT_PJE",
+    "password": "CHATBOT_PJE_DESE",
+    "dsn": oracledb.makedsn("orcldese1", 1521, sid="admteste")
 }
+
+# ChromaDB - busca vetorial
+CHROMA_PERSIST_DIR = os.path.join(os.path.dirname(__file__), "chroma_db")
 
 def gerar_hash(texto: str) -> str:
     return hashlib.sha256(texto.encode('utf-8')).hexdigest()
 
 def configurar_banco():
-    """Conecta, liga a extensão de vetores e cria as tabelas."""
-    conn = psycopg2.connect(**DB_CONFIG)
+    """Conecta ao Oracle (controle) e ao ChromaDB (vetores)."""
+    # Oracle - tabela de controle
+    conn = oracledb.connect(**DB_CONFIG)
     cursor = conn.cursor()
-    
-    # Ativa o superpoder dos vetores no banco
-    cursor.execute("CREATE EXTENSION IF NOT EXISTS vector;")
     
     # Tabela principal para guardar o controle das URLs e Hashes
     cursor.execute('''
-        CREATE TABLE IF NOT EXISTS documentos_controle (
-            url TEXT PRIMARY KEY,
-            hash_conteudo TEXT NOT NULL
-        )
-    ''')
-    
-    # Tabela para guardar os pedaços de texto e seus vetores
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS documentos_chunks (
-            id SERIAL PRIMARY KEY,
-            url TEXT,
-            texto_chunk TEXT NOT NULL,
-            embedding vector(384) 
-        )
+        BEGIN
+            EXECUTE IMMEDIATE '
+                CREATE TABLE documentos_controle (
+                    url VARCHAR2(1000) PRIMARY KEY,
+                    hash_conteudo VARCHAR2(64) NOT NULL
+                )
+            ';
+        EXCEPTION
+            WHEN OTHERS THEN
+                IF SQLCODE = -955 THEN NULL;
+                ELSE RAISE;
+                END IF;
+        END;
     ''')
     
     conn.commit()
-    register_vector(conn) # Ensina o Python a ler/escrever vetores
-    return conn, cursor
+
+    # ChromaDB - coleção de vetores
+    chroma_client = chromadb.PersistentClient(path=CHROMA_PERSIST_DIR)
+    collection = chroma_client.get_or_create_collection(
+        name="documentos_chunks",
+        metadata={"hnsw:space": "cosine"}
+    )
+    
+    return conn, cursor, collection
 
 # Lista de URLs oficiais fornecida pelo Arquiteto (Você!)
 URLS_OFICIAIS = [
@@ -114,9 +123,9 @@ def extrair_dados_do_site():
         return {}
 
 def sincronizar_base():
-    print("Iniciando a Arquitetura Suprema (PostgreSQL + pgvector)...")
+    print("Iniciando a Arquitetura Híbrida (Oracle + ChromaDB)...")
     
-    conn, cursor = configurar_banco()
+    conn, cursor, collection = configurar_banco()
     
     print("[IA] Carregando o modelo de transformação de texto em vetores...")
     # Baixa um modelo leve e rápido, ideal para português
@@ -125,8 +134,11 @@ def sincronizar_base():
     dados_site = extrair_dados_do_site()
     splitter = RecursiveCharacterTextSplitter(chunk_size=CHUNK_SIZE, chunk_overlap=CHUNK_OVERLAP)
     
+    # Consulta o Oracle para saber o que já existe
     cursor.execute('SELECT url, hash_conteudo FROM documentos_controle')
     documentos_locais = {row[0]: row[1] for row in cursor.fetchall()}
+
+    chunk_counter = 0  # Contador para gerar IDs únicos no ChromaDB
 
     for url, texto_novo in dados_site.items():
         novo_hash = gerar_hash(texto_novo)
@@ -135,19 +147,29 @@ def sincronizar_base():
         if url not in documentos_locais or documentos_locais[url] != novo_hash:
             if url in documentos_locais:
                 print(f"[ATUALIZAR] Recriando vetores para: {url}")
-                cursor.execute('DELETE FROM documentos_chunks WHERE url = %s', (url,))
-                cursor.execute('UPDATE documentos_controle SET hash_conteudo = %s WHERE url = %s', (novo_hash, url))
+                # Remove chunks antigos do ChromaDB filtrando pela URL
+                ids_antigos = collection.get(where={"url": url})["ids"]
+                if ids_antigos:
+                    collection.delete(ids=ids_antigos)
+                # Atualiza hash no Oracle
+                cursor.execute('UPDATE documentos_controle SET hash_conteudo = :1 WHERE url = :2', (novo_hash, url))
             else:
                 print(f"[NOVO] Criando vetores para: {url}")
-                cursor.execute('INSERT INTO documentos_controle (url, hash_conteudo) VALUES (%s, %s)', (url, novo_hash))
+                # Insere controle no Oracle
+                cursor.execute('INSERT INTO documentos_controle (url, hash_conteudo) VALUES (:1, :2)', (url, novo_hash))
             
-            # Divide o texto e cria os vetores
+            # Divide o texto e cria os vetores no ChromaDB
             pedacos = splitter.split_text(texto_novo)
             for pedaco in pedacos:
-                vetor = modelo.encode(pedaco).tolist() # Mágica: Texto vira números!
-                cursor.execute(
-                    'INSERT INTO documentos_chunks (url, texto_chunk, embedding) VALUES (%s, %s, %s)',
-                    (url, pedaco, vetor)
+                vetor = modelo.encode(pedaco).tolist()  # Mágica: Texto vira números!
+                chunk_id = f"{url}__chunk_{chunk_counter}"
+                chunk_counter += 1
+                
+                collection.add(
+                    ids=[chunk_id],
+                    embeddings=[vetor],
+                    documents=[pedaco],
+                    metadatas=[{"url": url}]
                 )
 
     conn.commit()

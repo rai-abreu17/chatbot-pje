@@ -20,8 +20,7 @@ import os
 import re
 from google import genai
 from google.genai import types
-import psycopg2
-from pgvector.psycopg2 import register_vector
+import chromadb
 from sentence_transformers import SentenceTransformer
 
 from config import (
@@ -31,14 +30,8 @@ from config import (
     SYSTEM_PROMPT,
 )
 
-# Configurações do Banco de Dados PostgreSQL (Docker)
-DB_CONFIG = {
-    "dbname": "base_conhecimento_pje",
-    "user": "postgres",
-    "password": "minhasenha123",
-    "host": "localhost",
-    "port": "5433"
-}
+# Diretório onde o ChromaDB persiste os dados vetoriais
+CHROMA_PERSIST_DIR = os.path.join(os.path.dirname(__file__), "chroma_db")
 
 
 # ============================================================
@@ -106,21 +99,23 @@ class RAGEngine:
     """
 
     def __init__(self):
-        """Inicializa o motor RAG: conecta ao PostgreSQL e prepara o modelo de vetores."""
-        print("[RAG] A inicializar motor RAG Supremo com PostgreSQL...")
+        """Inicializa o motor RAG: conecta ao ChromaDB e prepara o modelo de vetores."""
+        print("[RAG] A inicializar motor RAG Supremo com ChromaDB...")
 
         self.client = genai.Client(api_key=GEMINI_API_KEY)
         self.modelo_nome = GEMINI_MODEL
 
-        # Conecta ao PostgreSQL
-        self.conn = psycopg2.connect(**DB_CONFIG)
-        register_vector(self.conn)  # Ensina o Python a ler vetores do banco
-        self.cursor = self.conn.cursor()
+        # Conecta ao ChromaDB (busca vetorial)
+        self.chroma_client = chromadb.PersistentClient(path=CHROMA_PERSIST_DIR)
+        self.collection = self.chroma_client.get_or_create_collection(
+            name="documentos_chunks",
+            metadata={"hnsw:space": "cosine"}
+        )
 
         # Carrega a IA que transforma perguntas em números
         print("[RAG] A carregar modelo de vetores...")
         self.modelo_vetores = SentenceTransformer('all-MiniLM-L6-v2')
-        print("[RAG] Motor pronto e conectado ao PostgreSQL!")
+        print("[RAG] Motor pronto e conectado ao ChromaDB!")
 
 
 
@@ -154,7 +149,7 @@ class RAGEngine:
         return consulta_expandida
 
     def buscar_contexto(self, pergunta: str) -> str:
-        """Busca os trechos mais relevantes usando matemática vetorial diretamente no SQL."""
+        """Busca os trechos mais relevantes usando ChromaDB (busca vetorial nativa)."""
         
         # Expande a consulta com sinónimos
         consulta_expandida = self._expandir_consulta(pergunta) if hasattr(self, '_expandir_consulta') else pergunta
@@ -163,22 +158,19 @@ class RAGEngine:
         # Transforma a pergunta do utilizador num vetor (lista de números)
         vetor_pergunta = self.modelo_vetores.encode(consulta_expandida).tolist()
 
-        # A Magia do PostgreSQL: Acha os textos mais parecidos com a pergunta
-        # O operador <=> calcula a Distância do Cosseno entre os vetores
-        self.cursor.execute('''
-            SELECT texto_chunk, url
-            FROM documentos_chunks
-            ORDER BY embedding <=> %s::vector
-            LIMIT %s
-        ''', (vetor_pergunta, TOP_K_RESULTS))
+        # Busca vetorial no ChromaDB (similaridade de cosseno nativa)
+        resultados = self.collection.query(
+            query_embeddings=[vetor_pergunta],
+            n_results=TOP_K_RESULTS,
+            include=["documents", "metadatas"]
+        )
 
-        resultados = self.cursor.fetchall()
-
-        if not resultados:
+        if not resultados or not resultados["documents"] or not resultados["documents"][0]:
             return ""
 
         docs_relevantes = []
-        for texto, url in resultados:
+        for texto, metadata in zip(resultados["documents"][0], resultados["metadatas"][0]):
+            url = metadata.get("url", "desconhecida")
             # Injetamos a URL da fonte junto com o texto para o Gemini saber de onde veio!
             docs_relevantes.append(f"[Fonte: {url}]\n{texto}")
             print(f"[RAG] Encontrado trecho em: {url}")
