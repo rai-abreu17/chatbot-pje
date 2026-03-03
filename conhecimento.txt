@@ -27,15 +27,13 @@ Pré-Requisitos
 
 ---
 
-Onde Encontrar o PJe
-
-O PJe pode ser acessado das seguintes formas:
-
-• Na página principal da intranet.
-
-• Pela internet: No site do Tribunal Regional Eleitoral (TRE), digitando o endereço.
-
-• Através de um link no sistema Guardião.
+O Pje Zonas pode ser encontrado de diversas forma, como:
+Pela INTRANET em sua página principal;
+Pela INTERNET através do site do TRE-MA, no seguinte link: 
+https://www.tre-ma.jus.br/servicos-judiciais/processos/processo-judicial-eletronico-pje;
+Digitando o endereço diretamente no navegador web:
+https://pje1g-ma.tse.jus.br/pje;
+Ou no GUARDIÃO.
 
 Formas de Autenticação
 
@@ -52,6 +50,7 @@ Acesso Laranja:
 • Como obter: O usuário que utiliza login e senha precisa inserir o token do aplicativo Token PJe.
 • Restrições: Não permite assinar documentos.
 • Restrições: Não realiza interoperabilidade (acesso a dados) com outros sistemas, como os da Receita Federal e da OAB.
+
 Acesso Verde:
 • Ocorre quando: O usuário faz login diretamente com o Certificado Digital, pulando o acesso laranja.
 • Permissões: O usuário consegue assinar documentos e realizar todas as ações que seu perfil permite.
@@ -92,15 +91,51 @@ Token PJe (PJe Mobile)
 ----------------------
 Fonte: https://pjeje.github.io/dicas/acesso/tokenpje/
 
+
+
 Token PJe (PJe Mobile)
 Usuários internos (servidores e magistrados) podem configurar o aparelho celular para ser usado como token no PJe. Para tal fim, é necessário baixar o aplicativo compatível com o sistema operacional do celular e fazer o pareamento.
-Clicando aqui
-você encontra um tutorial com o passo-a-passo necessário para essa configuração (material cedido pelo TRESC).
-Erro conhecido na versão 1.5.0 para iPhone
+
+COMO REALIZAR A INSTALAÇÃO DO Token PJe (PJe Mobile):
+O sistema PJE permite assinatura eletrônica de documentos sem o uso de certificado em token físico. Com essa
+funcionalidade, o usuário pode assinar documentos no PJE utilizando um aplicativo mobile e um token virtual.
+Para isso, o usuário deverá instalar o aplicativo “Token PJe” e gerar um código de acesso temporário (token)
+para cada logon no PJE onde for necessário realizar a assinatura de documentos. Este roteiro orienta a
+realização desses procedimentos.
+
+Aplicativo “Token PJe” instalado no smartphone. Antes de iniciar os procedimentos abaixo, instale o aplicativo a
+partir da Google Play e Apple Store.
+
+1. Este processo de parear o dispositivo será realizado uma única vez no smartphone funcional. Não é necessário
+parear o celular a cada logon.
+1.1. No computador, acesse o site do PJE utilizando seus dados de acesso: CPF e senha;
+1.2. Acesse o menu no canto superior esquerdo da página, indicado pelo ícone , e selecione a opção
+Configurações e, em seguida, Mobile;
+1.3. Confira as informações apresentadas (CPF e e-mail) e clique em Gerar QRCODE. Nesse momento será
+gerado um QRCode e será enviado um código de confirmação para o seu e-mail cadastrado. Acesse o email para verificar o código gerado;
+1.4. No Smartphone, utilizando o aplicativo “Token PJe”, toque em LER QRCODE e direcione a câmera do
+celular para ler o QRCODE gerado pelo sistema no computador;
+1.5. Após a leitura do QRCode, confira as informações contidas no aplicativo, insira o código de confirmação
+anteriormente recebido por e-mail e clique em Confirmar.
+
+2. COMO GeraR Token para autenticação NO APLICATIVO Token PJe (PJe Mobile):
+2.1. Acesse o sistema PJE com seus dados de CPF e senha para que a tela de validação seja exibida;
+2.2. A cada logon realizado no PJE, onde for necessário realizar a assinatura de documentos, execute o
+aplicativo “Token PJE” no smartphone e toque em TOKEN na tela inicial;
+Obs.: Não é necessário realizar logon no aplicativo. O smatphone já deve ter sido pareado conforme capítulo I. Caso não tenha feito, solicite as instruções.
+2.3 Com o código/token gerado no celular, digite-o na tela de validação do PJE no computador (passo 2.1) e
+clique no botão Validar.
+Obs.: Realize a validação em menos de 15 segundos, caso contrário o token perderá a validade e o processo deverá ser repetido
+
+O sistema apresentará a bolinha verde ao lado do seu nome no canto superior direito do PJe , indicando
+que você está logado com o token digital e poderá assinar documentos no sistema sem a necessidade do
+certificado digital em token físico. Nas tarefas que exijam a certificação digital do usuário, como por exemplo na
+assinatura de documentos, o sistema apresentará dois botões para efetivar a assinatura. Clique no botão Assinar
+documentos(s) mobile para efetivar a assinatura do documento.
+
+Erro conhecido na versão 1.5.0 para iPhone no APLICATIVO Token PJe (PJe Mobile):
 O aplicativo PJe token tem apresentado um problema ao tentar realizar novo pareamento quando se utiliza a versão 1.5.0 em aparelhos com sistema iOS (celulares iPhone). Ao clicar para iniciar novo pareamento, a câmera não carrega e fica aparecendo apenas uma tela branca com o título
-Parear Dispositivo
-.
-Para solucionar, deve-se clicar duas vezes da tela inicial.
+Parear Dispositivo. Para solucionar, deve-se clicar duas vezes da tela inicial.
 
 ---
 
@@ -175,9 +210,17 @@ Para resolver o problema, todos os e-mails com links para geração de senha dev
 
 ---
 
-Permitir pop-ups no Chrome
-Por padrão, o Google Chrome impede que os pop-ups apareçam automaticamente na tela. Quando ocorre um bloqueio, a barra de endereço é marcada com o ícone Pop-up bloqueado Pop-up bloqueado. Se quiser, você pode permitir a exibição de pop-ups.
-No computador, abra o Chrome.
-No canto superior direito, clique em Mais Mais e Configurações.
-Clique em Privacidade e segurança e Configurações do site e Pop-ups e redirecionamentos.
-Escolha a opção que você quer definir como padrão.
+Como Permitir Pop-ups para os Sites no Google Chrome
+Abra o Google Chrome e clique nos três pontinhos no canto superior direito da tela.
+Selecione Configurações.
+No menu lateral esquerdo, clique em Privacidade e segurança.
+Na tela principal, clique em Configurações do site.
+Role a página para baixo até encontrar a seção "Conteúdo" e clique em Pop-ups e redirecionamentos.
+Em "Comportamento padrão", selecione a opção Os sites podem enviar pop-ups e usar redirecionamentos.
+
+Como Permitir Pop-ups para os Sites no Firefox:
+Clique no menu do Firefox (as três linhas horizontais no canto superior direito da tela).
+Selecione Configurações.
+No painel do lado esquerdo, clique em Privacidade e Segurança.
+Role a página para baixo até encontrar a seção Permissões.
+Desmarque a caixa de seleção ao lado de Bloquear janelas pop-up.
