@@ -53,3 +53,5 @@ Thumbs.db
 dist/
 build/
 *.egg-info/
+token.json
+credentials.json
